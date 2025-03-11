@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        a {
+            color: #ff6b6b;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #ff4f4f;
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            width: 350px;
+            text-align: left;
+            position: relative;
+        }
+
+        label {
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 320px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        input:focus {
+            outline: none;
+            border: 2px solid #ff6b6b;
+        }
+
+        button {
+            margin-bottom: 10px;
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 1.2rem;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #ff4f4f;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+
+        #private-key-popup h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+
+        #faceImage {
+            max-width: 200px;
+            margin-top: 10px;
+        }
+
+        #image-preview {
+            max-width: 200px;
+            margin-top: 10px;
+            margin-bottom:20px;
+        }
+
+        #oneid-container {
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        #scan-button, #turn-off-button {
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        #scan-button:hover, #turn-off-button:hover {
+            background: #ff4f4f;
+        }
+
+        #retake {
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            margin-top: 10px;
+        }
+
+        #retake:hover {
+            background: #ff4f4f;
+        }
+
+        #title-link:hover {
+            color: #ff4f4f;
+        }
+        #loading {
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+
+            position: fixed; /* Keeps it centered even when scrolling */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centers it perfectly */
+            padding: 20px 40px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .dots span {
+            opacity: 0;
+            animation: fade 1.5s infinite;
+        }
+
+        .dots span:nth-child(1) { animation-delay: 0s; }
+        .dots span:nth-child(2) { animation-delay: 0.3s; }
+        .dots span:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes fade {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        </style>
+    <script>
+        function cleanStartCamera() {
+            document.getElementById('faceImage').style.display = 'none';
+            document.getElementById('faceImageBase64').value = '';
+            document.getElementById('retake').style.display = 'none';
+            startCamera();
+        }
+        function validateNameSurname(input) {
+            const regex = /^[A-Za-z]+$/;
+            return regex.test(input);
+        }
+        function validateIdNumber(input) {
+            const regex = /^\d+$/;
+            return regex.test(input);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let scannedFace = false;
+            const fileInput = document.getElementById("fileInput");
+            const form = document.querySelector("form");
+            const video = document.getElementById("video");
+            const scanButton = document.getElementById("scan-button");
+            const titleLink = document.getElementById("title-link");
+            const faceImage = document.getElementById("faceImage");
+            const faceImageBase64 = document.getElementById("faceImageBase64");
+            let stream = null;
+
+            fileInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (file) {
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const imgPreview = document.getElementById("image-preview");
+                        imgPreview.src = e.target.result;
+                        imgPreview.style.display = "block";
+                        imgPreview.style.maxWidth = "200px";
+                        imgPreview.style.marginTop = "10px";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            form.addEventListener("submit", async function(event) {
+                if (!scannedFace) {
+                    event.preventDefault();
+                    alert("Face scan is required.");
+                    window.location.href = "/oneid/signup";
+                }
+                else if(!validateIdNumber(document.getElementById("embg").value)){
+                    event.preventDefault();
+                    alert("Invalid format of ID number.");
+                    window.location.href = "/oneid/signup";
+                }
+                else if((!validateNameSurname(document.getElementById("name").value) || (!validateNameSurname(document.getElementById("surname").value)))){
+                    event.preventDefault();
+                    alert("Invalid format of name or surname.");
+                    window.location.href = "/oneid/signup";
+                }
+
+                const loadingDiv = document.getElementById("loading");
+                form.style.display="none";
+                loadingDiv.style.display = "block";
+                document.getElementById("msg").style.display="none";
+            });
+
+            window.startCamera = function () {
+                document.getElementById("oneid-container").style.display = "block";
+                titleLink.style.display = "none";
+
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then((mediaStream) => {
+                        stream = mediaStream;
+                        video.srcObject = stream;
+                        scanButton.style.display = "block";
+                        document.getElementById("turn-off-button").style.display = "block";
+                    })
+                    .catch((err) => {
+                        console.error("Camera access denied", err);
+                    });
+            };
+
+            window.captureFrame = function () {
+                let canvas = document.createElement("canvas");
+                let context = canvas.getContext("2d");
+
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                let base64Image = canvas.toDataURL("image/png");
+                faceImage.src = base64Image;
+                faceImage.style.display = "block";
+                faceImageBase64.value = base64Image;
+                document.getElementById("retake").style.display = "block";
+                document.getElementById("oneid-container").style.display = "none";
+                scannedFace = true;
+
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            window.turnOffCamera = function () {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                document.getElementById("oneid-container").style.display = "none";
+                titleLink.style.display = "block";
+            };
+
+        });
+
+    </script>
+</head>
+<body>
+<h2>Sign Up</h2>
+<p id="msg" th:if="${alertMessage}" style="color: red; font-weight: bold;">
+    [[${alertMessage}]]
+</p>
+<form th:action="@{/signup}" method="post" enctype="multipart/form-data">
+    <div>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+        <label for="surname">Surname:</label>
+        <input type="text" id="surname" name="surname" required>
+    </div>
+    <div>
+        <label for="embg">ID Number:</label>
+        <input type="text" id="embg" name="embg" required>
+    </div>
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+
+    <div>
+        <label for="fileInput">Upload ID Card Image</label>
+        <input type="file" name="fileInput" id="fileInput" accept="image/*" required>
+        <img id="image-preview" style="display: none;">
+    </div>
+
+    <div>
+        <div id="oneid-container" style="display: none;">
+            <video id="video" autoplay width="320" height="240"></video>
+            <button id="scan-button" type="button" onclick="captureFrame()" style="display: none;">Scan Face</button>
+            <button id="turn-off-button" type="button" onclick="turnOffCamera()" style="display: none;">Turn Off Camera</button>
+        </div>
+        <div>
+            <button id="title-link" type="button" onclick="startCamera()">Make a face scan</button>
+        </div>
+        <div>
+            <img id="faceImage" style="display: none; max-width: 200px; margin-top: 10px;">
+            <input type="hidden" name="faceImageBase64" id="faceImageBase64">
+            <button id="retake" type="button" onclick="cleanStartCamera()" style="display: none;">Retake scan</button>
+        </div>
+    </div>
+
+    <button type="submit">Sign Up</button>
+    <div th:if="${param.error}">
+        <p th:text="${param.error}"></p>
+    </div>
+    <div th:if="${param.ocrText}">
+        <p th:text="${param.ocrText}"></p>
+    </div>
+    <div th:if="${param.existingUser}">
+        <p th:text="${param.existingUser}"></p>
+    </div>
+</form>
+<div id="loading" style="display: none;">
+    <span class="dots">Processing<span>.</span><span>.</span><span>.</span></span>
+</div>
+
+
+</body>
+</html>

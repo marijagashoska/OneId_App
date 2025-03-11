@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b00, #2a5298); /* Orange and Blue */
+            color: #fff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+
+    </style>
+</head>
+<body>
+<h1>Welcome, <span th:text="${username}"></span>!</h1>
+<h2>Your login was successful. You’re now ready to access your account and make the most of our services. Enjoy your time here!</h2>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Key</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 1.2rem;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        button:hover {
+            background: #ff4f4f;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+    </style>
+</head>
+<body>
+<h2>Get Private Key</h2>
+<p>Welcome, <span id="username" th:text="${session.username}"></span>!</p>
+<p>Your private key has been generated.</p>
+<button id="downloadKey">Download Private Key</button>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        let username = document.getElementById("username").textContent;
+        var checked=false;
+        var privateKey = /*[[${privateKey}]]*/ '';
+        console.log(privateKey)
+        if (privateKey) {
+            const downloadButton = document.getElementById("downloadKey");
+            downloadButton.addEventListener("click", function () {
+                checked=true;
+                const blob = new Blob([privateKey], { type: "text/plain" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "private_key.txt";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                sessionRemoval()
+                window.location.href = "/oneid/login";
+            });
+
+            function sessionRemoval(){
+                let data = {
+                    checked: checked,  // Boolean value
+                    username: username // Extracted username
+                };
+
+                fetch('/oneid/clear-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data) // Send JSON payload
+                })
+                    .then(response => response.json())
+                    .catch(error => console.error('Error clearing session:', error));
+                downloadButton.style.display = "none";
+                window.location.href = "/oneid/login";
+            }
+            setTimeout(sessionRemoval, 30000);
+        } else {
+            console.error("Private key is not available.");
+        }
+    });
+</script>
+</body>
+</html>
