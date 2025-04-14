@@ -28,4 +28,7 @@ Extracts relevant personal information from ID documents, reducing manual errors
 2. Facial Recognition:
 Uses pre-trained models (e.g., VGG-Face, ArcFace) to compare facial features and verify identity with high accuracy.
 
-  ![images/prva](https://github.com/marijagashoska/TerapijaMk/blob/master/images/prva.png)
+  ![images/img1](https://github.com/marijagashoska/OneId_App/blob/master/images/img1.png)
+  ![images/img2](https://github.com/marijagashoska/OneId_App/blob/master/images/img2.png)
+  ![images/img3](https://github.com/marijagashoska/OneId_App/blob/master/images/img3.png)
+  ![images/img4](https://github.com/marijagashoska/OneId_App/blob/master/images/img4.png)
